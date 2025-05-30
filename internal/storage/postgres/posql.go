@@ -81,6 +81,21 @@ func (p *PostgreStorage) Save(ctx context.Context, quote string, author string) 
 }
 
 func (p *PostgreStorage) Delete(ctx context.Context, id int) error {
+	query := `DELETE FROM quotes WHERE id = $1;`
+
+	result, err := p.conn.Exec(ctx, query, id)
+	if err != nil {
+		p.log.Error("Failed to delete quote", "error", err, "id", id)
+		return fmt.Errorf("failed to delete quote: %w", err)
+	}
+
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		p.log.Warn("Quote not found", "id", id)
+		return storage.ErrQuoteNotFound // Ваша кастомная ошибка (например, "quote not found")
+	}
+
+	p.log.Debug("Quote deleted successfully", "id", id)
 	return nil
 }
 

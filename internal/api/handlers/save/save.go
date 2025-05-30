@@ -56,7 +56,7 @@ func New(log *slog.Logger, saver Saver) http.HandlerFunc {
 
 		log.Info("quote saved", "id", id)
 
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(response.OKWithPayload(map[string]int{"id": id}))
 
 	}
