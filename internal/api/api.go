@@ -78,6 +78,6 @@ func Routes(log *slog.Logger, router *mux.Router) {
 		return nil
 	})
 	if err != nil {
-		log.Info("Error printing routes:", err)
+		log.Info("Error printing routes:", "err", err.Error())
 	}
 }

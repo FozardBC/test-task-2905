@@ -22,7 +22,7 @@ func New(log *slog.Logger, deleter Deleter) http.HandlerFunc {
 
 		reqCtx := r.Context()
 
-		log = log.With(requestid.ContextKeyRequestID, reqCtx.Value(requestid.ContextKeyRequestID))
+		log = log.With("requestID", reqCtx.Value(requestid.ContextKeyRequestID))
 
 		vars := mux.Vars(r)
 

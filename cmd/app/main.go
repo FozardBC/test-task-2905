@@ -113,7 +113,7 @@ func main() {
 }
 
 func startMigrations(logger *slog.Logger, connString string) error {
-	m, err := migrate.New("file://../../migrations", connString) // DEBUG:"
+	m, err := migrate.New("file://migrations", connString) // DEBUG:"
 	if err != nil {
 		return fmt.Errorf("can't start migration driver:%w", err)
 	}

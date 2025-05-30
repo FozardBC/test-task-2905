@@ -20,7 +20,7 @@ func New(log *slog.Logger, getter RandomGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqCtx := r.Context()
 
-		log = log.With(requestid.ContextKeyRequestID, reqCtx.Value(requestid.ContextKeyRequestID))
+		log := log.With("requestID", reqCtx.Value(requestid.ContextKeyRequestID))
 
 		quote, err := getter.RandomQuote(reqCtx)
 		if err != nil {

@@ -8,11 +8,6 @@ import (
 
 func New(log *slog.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		log = log.With(
-			slog.String("component", "middleware/logger"),
-		)
-
-		log.Info("logger middleware enabled")
 
 		fn := func(w http.ResponseWriter, r *http.Request) {
 
@@ -35,7 +30,7 @@ func New(log *slog.Logger) func(next http.Handler) http.Handler {
 				slog.String("path", r.URL.Path),
 				slog.String("remote_addr", r.RemoteAddr),
 				slog.String("user_agent", r.UserAgent()),
-				slog.String("reques_id", requestID),
+				slog.String("request_id", requestID),
 			)
 
 			entry.Info("request received")

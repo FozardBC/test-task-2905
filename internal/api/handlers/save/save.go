@@ -21,7 +21,7 @@ func New(log *slog.Logger, saver Saver) http.HandlerFunc {
 
 		reqCtx := r.Context()
 
-		log = log.With(requestid.ContextKeyRequestID, reqCtx.Value(requestid.ContextKeyRequestID))
+		log := log.With("requestID", reqCtx.Value(requestid.ContextKeyRequestID))
 
 		var req models.Quote
 

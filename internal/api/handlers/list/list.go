@@ -21,7 +21,7 @@ func New(log *slog.Logger, listGetter ListGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqCtx := r.Context()
 
-		log = log.With(requestid.ContextKeyRequestID, reqCtx.Value(requestid.ContextKeyRequestID))
+		log := log.With("requestID", reqCtx.Value(requestid.ContextKeyRequestID))
 
 		var list []*storage.StorageQuote
 
