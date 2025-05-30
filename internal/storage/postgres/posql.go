@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"app/internal/domain/models"
 	"app/internal/storage"
 	"context"
 	"fmt"
@@ -13,6 +14,7 @@ const (
 	QuoteTable      = "quotes"
 	IdColumn        = "id"
 	quoteColumn     = "quote"
+	authprColumn    = "author"
 	isDeletedColumn = "is_deleted"
 )
 
@@ -44,4 +46,63 @@ func New(ctx context.Context, log *slog.Logger, connString string) (*PostgreStor
 		conn: conn,
 		log:  log,
 	}, nil
+}
+
+func (p *PostgreStorage) Save(ctx context.Context, quote string, author string) (int, error) {
+
+	query := fmt.Sprintf(
+		"INSERT INTO %s (%s, %s) VALUES ($1,$2) RETURNING %s",
+		QuoteTable,
+		quoteColumn,
+		authprColumn,
+		IdColumn,
+	)
+
+	var id int
+
+	err := p.conn.QueryRow(ctx, query, quote, author).Scan(&id)
+	if err != nil {
+		p.log.Error(storage.ErrFailedToSaveQuote.Error(), "error", err)
+
+		return 0, fmt.Errorf("%w: %w", storage.ErrFailedToSaveQuote, err)
+	}
+
+	p.log.Debug("Quote saved successfully", "id", id, "quote", quote, "author", author)
+	return id, nil
+
+}
+
+func (p *PostgreStorage) Delete(ctx context.Context, id int) error {
+	return nil
+}
+
+func (p *PostgreStorage) Get(ctx context.Context, id int) (*models.Quote, error) {
+	return nil, nil
+}
+
+func (p *PostgreStorage) List(ctx context.Context) ([]*models.Quote, error) {
+	return nil, nil
+}
+
+func (p *PostgreStorage) ListByAuthor(ctx context.Context, author string) ([]*models.Quote, error) {
+	return nil, nil
+}
+
+func (p *PostgreStorage) Ping(ctx context.Context) error {
+	if err := p.conn.Ping(ctx); err != nil {
+		p.log.Error("Failed to ping database", "error", err)
+		return fmt.Errorf("%w:%w", storage.ErrPingStorage, err)
+	}
+	p.log.Debug("Database ping successful")
+	return nil
+}
+
+func (p *PostgreStorage) Close() {
+	if p.conn != nil {
+		p.log.Debug("Closing database connection")
+		p.conn.Close()
+	} else {
+		p.log.Warn("No database connection to close")
+	}
+	p.log.Debug("Database connection closed")
 }
