@@ -111,6 +111,26 @@ func (s *Service) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
+func (s *Service) RandomQuote(ctx context.Context) (*models.Quote, error) {
+	s.log.Debug("Getting random quote")
+
+	quote, err := s.storage.Random(ctx)
+	if err != nil {
+		if errors.Is(err, storage.ErrQuoteNotFound) {
+			s.log.Error(storage.ErrQuoteNotFound.Error())
+
+			return nil, fmt.Errorf("%w: %w", storage.ErrQuoteNotFound, err)
+		}
+		s.log.Error(ErrGetQuoteFailed.Error(), "error", err)
+
+		return nil, fmt.Errorf("%w: %w", ErrGetQuoteFailed, err)
+	}
+
+	s.log.Debug("Random quote retrieved successfully", "quote", quote)
+
+	return quote, nil
+}
+
 func (s *Service) Get(ctx context.Context, id string) (*models.Quote, error) {
 	s.log.Debug("Getting quote", "id", id)
 

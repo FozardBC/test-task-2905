@@ -32,5 +32,6 @@ type Storage interface {
 	Get(ctx context.Context, id int) (*models.Quote, error)
 	List(ctx context.Context) ([]*StorageQuote, error)
 	ListByAuthor(ctx context.Context, author string) ([]*StorageQuote, error)
+	Random(ctx context.Context) (*models.Quote, error)
 	Close()
 }

@@ -185,6 +185,28 @@ func (p *PostgreStorage) ListByAuthor(ctx context.Context, author string) ([]*st
 	return quotes, nil
 }
 
+func (p *PostgreStorage) Random(ctx context.Context) (*models.Quote, error) {
+
+	query := fmt.Sprintf(
+		"SELECT %s, %s FROM %s ORDER BY RANDOM() LIMIT 1",
+		quoteColumn,
+		authorColumn,
+		QuoteTable,
+	)
+
+	var quote models.Quote
+	err := p.conn.QueryRow(ctx, query).Scan(&quote.Text, &quote.Author)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, storage.ErrQuotesListEmpty
+		}
+		p.log.Error("Failed to get random quote", "error", err)
+		return nil, fmt.Errorf("failed to get random quote: %w", err)
+	}
+
+	return &quote, nil
+}
+
 func (p *PostgreStorage) Ping(ctx context.Context) error {
 	if err := p.conn.Ping(ctx); err != nil {
 		p.log.Error("Failed to ping database", "error", err)
