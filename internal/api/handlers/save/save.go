@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	requestid "app/internal/api/middleware/requestID"
 	"app/internal/domain/models"
 	"app/internal/lib/api/response"
 	"context"
@@ -11,8 +12,6 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-const requestIDKey = "requestID"
-
 type Saver interface {
 	Save(ctx context.Context, q *models.Quote) (int, error)
 }
@@ -22,7 +21,7 @@ func Save(log *slog.Logger, saver Saver) http.HandlerFunc {
 
 		reqCtx := r.Context()
 
-		log = log.With(requestIDKey, reqCtx.Value(requestIDKey))
+		log = log.With(requestid.ContextKeyRequestID, reqCtx.Value(requestid.ContextKeyRequestID))
 
 		var req models.Quote
 
@@ -31,6 +30,7 @@ func Save(log *slog.Logger, saver Saver) http.HandlerFunc {
 			json.NewEncoder(w).Encode(response.Error("Invalid request body"))
 			return
 		}
+		defer r.Body.Close()
 
 		err := validator.New().Struct(&req)
 		if err != nil {
