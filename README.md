@@ -18,13 +18,13 @@ docker compose up -d --remove-orphans
 Файл docker-compose.yml уже содержит настройки:
 
 PostgreSQL:
-  Порт: 5432
-  Пользователь: postgres
-  Пароль: qwerty
-  База данных: test-task-db
+ - Порт: 5432
+ - Пользователь: postgres
+ - Пароль: qwerty
+ - База данных: test-task-db
 Сервер:
-  Порт: 8080
-  Подключение к БД: postgresql://postgres:qwerty@postgres:5432/test-task-db?sslmode=disable
+  - Порт: 8080
+  - Подключение к БД: postgresql://postgres:qwerty@postgres:5432/test-task-db?sslmode=disable
   
 Если нужно изменить параметры, отредактируйте docker-compose.yml и перезапустите сервисы.
 
