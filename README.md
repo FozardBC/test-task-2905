@@ -5,8 +5,8 @@
 
 ### 1. Клонируйте репозиторий 
 ```
-git clone <ваш-репозиторий>
-cd <папка-проекта>
+git clone https://github.com/FozardBC/test-task-2905.git
+cd est-task-2905/build
 ```
 ### 2. Запустите сервисы через Docker Compose 
 ```
