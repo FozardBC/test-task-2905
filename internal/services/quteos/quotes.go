@@ -155,12 +155,6 @@ func (s *Service) List(ctx context.Context) ([]*storage.StorageQuote, error) {
 func (s *Service) ListByAuthor(ctx context.Context, author string) ([]*storage.StorageQuote, error) {
 	s.log.Debug("Listing all quotes")
 
-	if len(author) < 2 {
-		s.log.Error(ErrInvalidAuthorName.Error(), "author", author)
-
-		return nil, fmt.Errorf("%w: %s", ErrInvalidAuthorName, author)
-	}
-
 	quotes, err := s.storage.ListByAuthor(ctx, author)
 	if err != nil {
 		s.log.Error(ErrGetQuoteFailed.Error(), "error", err)

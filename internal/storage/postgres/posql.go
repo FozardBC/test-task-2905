@@ -128,12 +128,61 @@ func (p *PostgreStorage) List(ctx context.Context) ([]*storage.StorageQuote, err
 
 	tx.Commit(ctx)
 
+	if len(quotes) == 0 {
+		p.log.Info(storage.ErrQuotesListEmpty.Error())
+		return nil, storage.ErrQuotesListEmpty
+	}
+
 	return quotes, nil
 
 }
 
 func (p *PostgreStorage) ListByAuthor(ctx context.Context, author string) ([]*storage.StorageQuote, error) {
-	return nil, nil
+	tx, err := p.conn.BeginTx(ctx, pgx.TxOptions{
+		IsoLevel: pgx.RepeatableRead,
+	})
+	if err != nil {
+		p.log.Error(ErrTxBegin.Error(), "err", err.Error())
+
+		return nil, fmt.Errorf("%w:%w", ErrTxBegin, err)
+	}
+	defer tx.Rollback(ctx)
+
+	query := fmt.Sprintf(
+		"SELECT %s, %s, %s FROM %s WHERE %s = $1",
+		IdColumn,
+		quoteColumn,
+		authorColumn,
+		QuoteTable,
+		authorColumn,
+	)
+
+	var quotes []*storage.StorageQuote
+
+	rows, err := tx.Query(ctx, query, author)
+	if err != nil {
+		p.log.Error("Failed to query quotes", "error", err)
+		return nil, fmt.Errorf("failed to query quotes: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var q storage.StorageQuote
+		if err := rows.Scan(&q.Id, &q.Text, &q.Author); err != nil {
+			p.log.Error("Failed to scan quote", "error", err)
+			return nil, fmt.Errorf("failed to scan quote: %w", err)
+		}
+		quotes = append(quotes, &q)
+	}
+
+	tx.Commit(ctx)
+
+	if len(quotes) == 0 {
+		p.log.Info("No quotes found for author", "author", author)
+		return nil, storage.ErrQuotesListEmpty
+	}
+
+	return quotes, nil
 }
 
 func (p *PostgreStorage) Ping(ctx context.Context) error {

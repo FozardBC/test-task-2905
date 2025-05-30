@@ -45,7 +45,6 @@ func (a *API) Endpoints() {
 
 	v1.Handle("/quotes", json.JSONContentTypeMW(save.New(a.Log, a.Service))).Methods("POST")
 	v1.Handle("/quetos", json.JSONContentTypeMW(list.New(a.Log, a.Service))).Methods("GET")
-	// a.Router.HandleFunc("/quetos/random", a.Servie.).Methods("GET")
 	// a.Router.HandleFunc("/quote/{author=l;;l}", a.Servie.Delete).Methods("GET")
 	// a.Router.HandleFunc("/quetos/{id}", a.Servie.Update).Methods("DELETE")
 }
