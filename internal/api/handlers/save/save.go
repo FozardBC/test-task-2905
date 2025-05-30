@@ -1,4 +1,4 @@
-package handlers
+package save
 
 import (
 	requestid "app/internal/api/middleware/requestID"
@@ -16,7 +16,7 @@ type Saver interface {
 	Save(ctx context.Context, q *models.Quote) (int, error)
 }
 
-func Save(log *slog.Logger, saver Saver) http.HandlerFunc {
+func New(log *slog.Logger, saver Saver) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		reqCtx := r.Context()

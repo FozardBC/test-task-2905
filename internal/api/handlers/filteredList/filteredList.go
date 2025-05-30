@@ -1,0 +1,3 @@
+package filteredlist
+
+func New()

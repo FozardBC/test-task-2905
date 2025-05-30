@@ -4,9 +4,11 @@ import (
 	"app/internal/domain/models"
 	"app/internal/storage"
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -14,7 +16,7 @@ const (
 	QuoteTable      = "quotes"
 	IdColumn        = "id"
 	quoteColumn     = "quote"
-	authprColumn    = "author"
+	authorColumn    = "author"
 	isDeletedColumn = "is_deleted"
 )
 
@@ -22,6 +24,12 @@ type PostgreStorage struct {
 	conn *pgxpool.Pool
 	log  *slog.Logger
 }
+
+var (
+	ErrTxBegin  = errors.New("can't start transaction")
+	ErrTxCommit = errors.New("can't commit transaction")
+	ErrQuery    = errors.New("can't do query")
+)
 
 func New(ctx context.Context, log *slog.Logger, connString string) (*PostgreStorage, error) {
 	log.Debug("Connecting to database", "Connect String", connString)
@@ -54,7 +62,7 @@ func (p *PostgreStorage) Save(ctx context.Context, quote string, author string) 
 		"INSERT INTO %s (%s, %s) VALUES ($1,$2) RETURNING %s",
 		QuoteTable,
 		quoteColumn,
-		authprColumn,
+		authorColumn,
 		IdColumn,
 	)
 
@@ -80,11 +88,51 @@ func (p *PostgreStorage) Get(ctx context.Context, id int) (*models.Quote, error)
 	return nil, nil
 }
 
-func (p *PostgreStorage) List(ctx context.Context) ([]*models.Quote, error) {
-	return nil, nil
+func (p *PostgreStorage) List(ctx context.Context) ([]*storage.StorageQuote, error) {
+
+	tx, err := p.conn.BeginTx(ctx, pgx.TxOptions{
+		IsoLevel: pgx.RepeatableRead,
+	})
+	if err != nil {
+		p.log.Error(ErrTxBegin.Error(), "err", err.Error())
+
+		return nil, fmt.Errorf("%w:%w", ErrTxBegin, err)
+	}
+	defer tx.Rollback(ctx)
+
+	query := fmt.Sprintf(
+		"SELECT %s, %s, %s FROM %s",
+		IdColumn,
+		quoteColumn,
+		authorColumn,
+		QuoteTable,
+	)
+
+	var quotes []*storage.StorageQuote
+
+	rows, err := tx.Query(ctx, query)
+	if err != nil {
+		p.log.Error("Failed to query quotes", "error", err)
+		return nil, fmt.Errorf("failed to query quotes: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var q storage.StorageQuote
+		if err := rows.Scan(&q.Id, &q.Text, &q.Author); err != nil {
+			p.log.Error("Failed to scan quote", "error", err)
+			return nil, fmt.Errorf("failed to scan quote: %w", err)
+		}
+		quotes = append(quotes, &q)
+	}
+
+	tx.Commit(ctx)
+
+	return quotes, nil
+
 }
 
-func (p *PostgreStorage) ListByAuthor(ctx context.Context, author string) ([]*models.Quote, error) {
+func (p *PostgreStorage) ListByAuthor(ctx context.Context, author string) ([]*storage.StorageQuote, error) {
 	return nil, nil
 }
 

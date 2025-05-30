@@ -74,7 +74,7 @@ func (s *Service) Save(ctx context.Context, q *models.Quote) (int, error) {
 
 	// save quote to storage
 
-	id, err := s.storage.Save(ctx, q.Quote, q.Author)
+	id, err := s.storage.Save(ctx, q.Text, q.Author)
 	if err != nil {
 		s.log.Error(ErrSaveQuoteFailed.Error(), "error", err)
 
@@ -137,7 +137,7 @@ func (s *Service) Get(ctx context.Context, id string) (*models.Quote, error) {
 	return quote, nil
 }
 
-func (s *Service) List(ctx context.Context) ([]*models.Quote, error) {
+func (s *Service) List(ctx context.Context) ([]*storage.StorageQuote, error) {
 	s.log.Debug("Listing all quotes")
 
 	quotes, err := s.storage.List(ctx)
@@ -152,7 +152,7 @@ func (s *Service) List(ctx context.Context) ([]*models.Quote, error) {
 	return quotes, nil
 }
 
-func (s *Service) ListByAuthor(ctx context.Context, author string) ([]*models.Quote, error) {
+func (s *Service) ListByAuthor(ctx context.Context, author string) ([]*storage.StorageQuote, error) {
 	s.log.Debug("Listing all quotes")
 
 	if len(author) < 2 {

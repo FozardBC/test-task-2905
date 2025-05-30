@@ -18,13 +18,19 @@ var (
 	ErrFailedToGetQuote     = errors.New("failed to get quote")
 	ErrFailedToListQuotes   = errors.New("failed to list quotes")
 	ErrFailedToListByAuthor = errors.New("failed to list quotes by author")
+	ErrQuotesListEmpty      = errors.New("quotes list is empty")
 )
+
+type StorageQuote struct {
+	models.Quote
+	Id int `json:"id"`
+}
 
 type Storage interface {
 	Save(ctx context.Context, quote string, author string) (int, error)
 	Delete(ctx context.Context, id int) error
 	Get(ctx context.Context, id int) (*models.Quote, error)
-	List(ctx context.Context) ([]*models.Quote, error)
-	ListByAuthor(ctx context.Context, author string) ([]*models.Quote, error)
+	List(ctx context.Context) ([]*StorageQuote, error)
+	ListByAuthor(ctx context.Context, author string) ([]*StorageQuote, error)
 	Close()
 }
