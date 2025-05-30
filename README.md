@@ -22,6 +22,8 @@ PostgreSQL:
  - Пользователь: postgres
  - Пароль: qwerty
  - База данных: test-task-db
+
+   
 Сервер:
   - Порт: 8080
   - Подключение к БД: postgresql://postgres:qwerty@postgres:5432/test-task-db?sslmode=disable
